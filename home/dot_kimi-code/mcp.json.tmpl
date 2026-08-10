@@ -1,0 +1,27 @@
+{{- $mcp := include "dot_config/agents/mcp.yaml" | fromYaml -}}
+{{- $envfile := joinPath .chezmoi.sourceDir ".." ".env" -}}
+{{- $servers := list -}}
+{{- range $name, $srv := $mcp.servers -}}
+  {{- $fields := list (printf "\"command\": %s" ($srv.command | toJson)) -}}
+  {{- if $srv.args -}}
+    {{- $fields = append $fields (printf "\"args\": %s" ($srv.args | toJson)) -}}
+  {{- end -}}
+  {{- if $srv.env -}}
+    {{- $envs := list -}}
+    {{- range $var := $srv.env -}}
+      {{- $val := output "sh" "-c" (printf "grep '^%s=' '%s' 2>/dev/null | cut -d= -f2- || true" $var $envfile) | trim -}}
+      {{- if $val -}}
+        {{- $envs = append $envs (printf "%s: %s" ($var | toJson) ($val | toJson)) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $envs -}}
+      {{- $fields = append $fields (printf "\"env\": { %s }" ($envs | join ", ")) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $servers = append $servers (printf "%s: { %s }" ($name | toJson) ($fields | join ", ")) -}}
+{{- end -}}
+{
+  "mcpServers": {
+    {{ $servers | join ",\n    " }}
+  }
+}

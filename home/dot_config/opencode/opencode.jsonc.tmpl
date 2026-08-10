@@ -1,0 +1,26 @@
+{{- $mcp := include "dot_config/agents/mcp.yaml" | fromYaml -}}
+{{- $envfile := joinPath .chezmoi.sourceDir ".." ".env" -}}
+{{- $servers := list -}}
+{{- range $name, $srv := $mcp.servers -}}
+  {{- $cmd := prepend (default list $srv.args) $srv.command -}}
+  {{- $fields := list "\"type\": \"local\"" (printf "\"command\": %s" ($cmd | toJson)) "\"enabled\": true" "\"timeout\": 15000" -}}
+  {{- if $srv.env -}}
+    {{- $envs := list -}}
+    {{- range $var := $srv.env -}}
+      {{- $val := output "sh" "-c" (printf "grep '^%s=' '%s' 2>/dev/null | cut -d= -f2- || true" $var $envfile) | trim -}}
+      {{- if $val -}}
+        {{- $envs = append $envs (printf "%s: %s" ($var | toJson) ($val | toJson)) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $envs -}}
+      {{- $fields = append $fields (printf "\"environment\": { %s }" ($envs | join ", ")) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $servers = append $servers (printf "%s: { %s }" ($name | toJson) ($fields | join ", ")) -}}
+{{- end -}}
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    {{ $servers | join ",\n    " }}
+  }
+}

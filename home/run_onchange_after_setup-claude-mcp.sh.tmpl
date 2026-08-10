@@ -1,0 +1,36 @@
+{{- $mcp := include "dot_config/agents/mcp.yaml" | fromYaml -}}
+{{- $envfile := joinPath .chezmoi.sourceDir ".." ".env" -}}
+#!/bin/sh
+# Generated from dot_config/agents/mcp.yaml — edit the yaml, not this script.
+# chezmoi re-runs this script whenever the rendered content changes.
+set -e
+
+if ! command -v claude >/dev/null 2>&1; then
+    exit 0
+fi
+
+ensure_stdio_mcp() {
+    name=$1
+    env_flags=$2
+    cmd=$3
+    if claude mcp get "$name" >/dev/null 2>&1; then
+        claude mcp remove "$name" -s user >/dev/null 2>&1 || true
+    fi
+    # intentional word splitting on $env_flags and $cmd
+    claude mcp add --scope user --transport stdio $env_flags "$name" $cmd
+}
+
+{{ range $name, $srv := $mcp.servers -}}
+{{- $envflags := list -}}
+{{- range $var := $srv.env -}}
+{{- $val := output "sh" "-c" (printf "grep '^%s=' '%s' 2>/dev/null | cut -d= -f2- || true" $var $envfile) | trim -}}
+{{- if $val -}}
+{{- $envflags = append $envflags (printf "--env %s=%s" $var $val) -}}
+{{- end -}}
+{{- end -}}
+{{- $cmdline := $srv.command -}}
+{{- range $arg := $srv.args -}}
+{{- $cmdline = printf "%s %s" $cmdline $arg -}}
+{{- end }}
+ensure_stdio_mcp {{ $name }} "{{ $envflags | join " " }}" "{{ $cmdline }}"
+{{ end -}}

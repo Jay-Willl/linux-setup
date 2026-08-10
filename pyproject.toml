@@ -1,7 +1,7 @@
 [project]
 name = "tectonic"
 version = "1.0.0"
-description = "Multi-host environment provisioning and management"
+description = "Single-machine environment bootstrap for macOS and Linux"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

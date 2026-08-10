@@ -1,0 +1,13 @@
+# MCP server declarations — single source of truth for all code agents.
+# Rendered to each agent's native config by chezmoi:
+#   kimi     → ~/.kimi-code/mcp.json              (dot_kimi-code/mcp.json.tmpl)
+#   opencode → ~/.config/opencode/opencode.jsonc  (dot_config/opencode/opencode.jsonc.tmpl)
+#   claude   → claude mcp add                     (run_onchange_after_setup-claude-mcp.sh.tmpl)
+#
+# env lists variable names whose values are read from ../.env (repo root,
+# gitignored) at apply time. Missing values are skipped silently.
+servers:
+  strata:
+    command: strata
+    args: [serve]
+    env: [OPENAI_API_KEY]

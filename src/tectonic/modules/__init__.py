@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
 from tectonic.modules import base, shell, shell_hpc
-from tectonic.modules.apps import docker
+from tectonic.modules.apps import docker, kimi
 from tectonic.modules.dev import c, node, python
 
 MODULES: dict[str, Callable[[], None]] = {
@@ -12,6 +12,7 @@ MODULES: dict[str, Callable[[], None]] = {
     "dev-python": python.run,
     "dev-node": node.run,
     "apps-docker": docker.run,
+    "apps-kimi": kimi.run,
 }
 
 

@@ -41,10 +41,12 @@ tectonic/
 │   └── urls.yaml             # External installer URLs
 ├── home/                     # chezmoi source directory (Layer 2)
 │   ├── .chezmoidata/         # symlinks to configs/ for chezmoi template data
+│   ├── dot_config/agents/    # Agent canonical: AGENTS.md, mcp.yaml, skills/
+│   ├── dot_claude/           # Claude Code delivery (CLAUDE.md.tmpl, settings.json)
+│   ├── dot_kimi-code/        # Kimi Code delivery (AGENTS.md.tmpl, mcp.json.tmpl)
+│   ├── dot_config/opencode/  # opencode delivery (AGENTS.md.tmpl, opencode.jsonc.tmpl)
 │   ├── dot_zshenv
-│   ├── dot_claude/           # Claude Code config (CLAUDE.md, mcp.json, settings.json)
-│   ├── dot_config/
-│   └── run_onchange_*.sh     # chezmoi-triggered scripts (e.g. MCP registration)
+│   └── run_onchange_*.sh     # chezmoi-triggered scripts (skills linking, MCP registration)
 ├── src/tectonic/             # Python environment manager (Layer 1)
 │   ├── config.py
 │   ├── base/                 # ConfigService (reads configs/ YAML)
@@ -111,7 +113,28 @@ Each module is a Python file with a `run()` entry point, registered in `modules/
 | `dev-python` | `modules/dev/python.py` | uv |
 | `dev-node` | `modules/dev/node.py` | Node.js LTS |
 | `apps-docker` | `modules/apps/docker.py` | Docker |
+| `apps-kimi` | `modules/apps/kimi.py` | Kimi Code CLI |
 | `shell-hpc` | `modules/shell_hpc.py` | HPC environment (lmod-based shell) |
+
+## Agent Configuration
+
+Code agents (Claude Code, Kimi Code, opencode) share a single source of truth, delivered to each agent's native location by chezmoi.
+
+**Canonical** lives in `home/dot_config/agents/` → `~/.config/agents/`:
+
+- `AGENTS.md` — global instructions
+- `mcp.yaml` — MCP server declarations
+- `skills/` — agent skills, symlinked into each agent's directory by `run_onchange_after_link-agent-skills.sh`
+
+**Delivery** renders the canonical files into each agent's native format:
+
+- Claude Code: `dot_claude/CLAUDE.md.tmpl` (instructions), `run_onchange_after_setup-claude-mcp.sh.tmpl` (MCP via `claude mcp add` — file-managing `~/.claude.json` is not possible, it holds volatile state)
+- Kimi Code: `dot_kimi-code/AGENTS.md.tmpl`, `dot_kimi-code/mcp.json.tmpl`
+- opencode: `dot_config/opencode/AGENTS.md.tmpl`, `dot_config/opencode/opencode.jsonc.tmpl`
+
+**Secrets**: `mcp.yaml` lists only env var *names*; values are read from `../.env` (repo root, gitignored) at apply time and injected into each agent's config. Missing values are skipped, so machines without the secret still apply cleanly.
+
+To add an MCP server, edit `mcp.yaml` only. To change global instructions, edit `AGENTS.md` only. To add a new agent, add its delivery template (and a `link_skills` line).
 
 ## Apply Pipeline
 

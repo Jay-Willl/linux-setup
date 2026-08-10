@@ -56,6 +56,7 @@ Modules are internal to `packages` — not exposed as CLI commands. The host's p
 | `dev-python` | uv |
 | `dev-node` | Node.js LTS, pnpm |
 | `apps-docker` | Docker |
+| `apps-kimi` | Kimi Code CLI |
 | `shell-hpc` | HPC environment (lmod-based shell) |
 
 ## Tools

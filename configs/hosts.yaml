@@ -1,5 +1,5 @@
 presets:
-  workstation: [base, shell, dev-c, dev-python, dev-node]
+  workstation: [base, shell, dev-c, dev-python, dev-node, apps-kimi]
   server: [base, shell, dev-python, dev-node]
   hpc: [shell-hpc]
 

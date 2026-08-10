@@ -1,3 +1,3 @@
-from tectonic.modules.apps import docker
+from tectonic.modules.apps import docker, kimi
 
-__all__ = ["docker"]
+__all__ = ["docker", "kimi"]

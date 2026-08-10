@@ -8,4 +8,7 @@ LICENSE
 {{ if eq .hosttype "hpc" }}
 .config/1Password
 .claude
+.kimi-code
+.config/agents
+.config/opencode
 {{ end }}
