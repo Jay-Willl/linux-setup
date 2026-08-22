@@ -17,7 +17,7 @@ ensure_stdio_mcp() {
         claude mcp remove "$name" -s user >/dev/null 2>&1 || true
     fi
     # intentional word splitting on $env_flags and $cmd
-    claude mcp add --scope user --transport stdio $env_flags "$name" $cmd
+    claude mcp add --scope user --transport stdio "$name" $env_flags -- $cmd
 }
 
 {{ range $name, $srv := $mcp.servers -}}
